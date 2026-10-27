@@ -1,0 +1,10 @@
+"args": [
+    "-fdiagnostics-color=always",
+    "-g",
+    "-std=c++17",
+    "${fileDirname}/main.cpp",
+    "${fileDirname}/draw.cpp",
+    "-o",
+    "${fileDirname}/main",
+    "`pkg-config --cflags --libs sdl2`"
+]
