@@ -81,7 +81,24 @@ void put_pixel_safe(SDL_Surface *s, int x, int y, Uint32 color){
       }
     }
 }
-  void mul(float a[3][3], float b[3][3], float result[3][3]){
+
+void punct(SDL_Surface *s, float x1, float y1, float x2, float y2, Uint32 color){
+  int parts = 2;
+  for (int j = 0; j < parts; j += 2){
+    float t1 = (float)j / parts;
+    float t2 = (float)(j + 1) / parts;
+
+    float ax = (1 - t1) * x1 + t1 * x2;
+    float ay = (1 - t1) * y1 + t1 * y2;
+
+    float bx = (1 - t2) * x1 + t2 * x2;
+    float by = (1 - t2) * y1 + t2 * y2;
+
+    line(s, int(ax), int(ay), int(bx), int(by), color);
+  }
+}
+
+void mul(float a[3][3], float b[3][3], float result[3][3]){
     for (int i = 0; i < 3; i++){
       for (int j = 0; j < 3; j++){
       result[i][j] = 0;
@@ -159,7 +176,7 @@ void put_pixel_safe(SDL_Surface *s, int x, int y, Uint32 color){
       float y1 = M[1][0] * px[i] + M[1][1] * py[i] + M[1][2];
       float x2 = M[0][0] * px[next] + M[0][1] * py[next] + M[0][2];
       float y2 = M[1][0] * px[next] + M[1][1] * py[next] + M[1][2];
-      line(s, (int)x1, (int)y1, (int)x2, (int)y2, RGB32(0,255,255));
+      punct(s, (int)x1, (int)y1, (int)x2, (int)y2, RGB32(0,255,255));
       }
     float nx[20];
     float ny[20];
