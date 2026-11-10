@@ -154,6 +154,23 @@ void left_mul_M(float L[3][3]){
     pivotX = mx;
     pivotY = my;
   }
+    if (keys[SDL_SCANCODE_N] && nWasPressed == false){
+    if (count < 100) count = count + 1;
+  }
+  if (keys[SDL_SCANCODE_M] && mWasPressed == false){
+    if (count > 1) count = count - 1;
+  }
+  nWasPressed = keys[SDL_SCANCODE_N];
+  mWasPressed = keys[SDL_SCANCODE_M];
+
+  if (keys[SDL_SCANCODE_V] && vWasPressed == false){
+    if (m < 20) m = m + 1;
+  }
+  if (keys[SDL_SCANCODE_C] && cWasPressed == false){
+    if (m > 3) m = m - 1;
+  }
+  vWasPressed = keys[SDL_SCANCODE_V];
+  cWasPressed = keys[SDL_SCANCODE_C];
   float px[20];
   float py[20];
 
