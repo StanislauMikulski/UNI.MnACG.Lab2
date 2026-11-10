@@ -26,7 +26,6 @@ float angle = 0;
 int count = 20;
 int m = 4;
 float mu = 0.1;
-float PI = 3.14159265;
 
 bool nWasPressed = false;
 bool mWasPressed = false;
@@ -149,7 +148,7 @@ void put_pixel_safe(SDL_Surface *s, int x, int y, Uint32 color){
   float py[20];
 
     for (int i = 0; i < m; i++) {
-    float a = 2 * PI * i / m;
+    float a = 2 * M_PI * i / m;
     px[i] = cos(a);
     py[i] = sin(a);
     }
