@@ -18,10 +18,13 @@ Uint32 get_pixel32(SDL_Surface *surface, int x, int y){
   return pixels[(y * surface->w) + x];
 }
 
-float posX = SCREEN_WIDTH / 2;
-float posY = SCREEN_HEIGHT / 2;
-float scale = 200;
-float angle = 0;
+float M[3][3] = {
+  {200, 0, SCREEN_WIDTH / 2},
+  {0, 200, SCREEN_HEIGHT / 2},
+  {0, 0, 1}
+};
+int pivotX = SCREEN_WIDTH / 2;
+int pivotY = SCREEN_HEIGHT / 2;
 
 int count = 20;
 int m = 4;
@@ -83,7 +86,7 @@ void put_pixel_safe(SDL_Surface *s, int x, int y, Uint32 color){
 }
 
 void punct(SDL_Surface *s, float x1, float y1, float x2, float y2, Uint32 color){
-  int parts = 2;
+  int parts = 32;
   for (int j = 0; j < parts; j += 2){
     float t1 = (float)j / parts;
     float t2 = (float)(j + 1) / parts;
@@ -107,60 +110,50 @@ void mul(float a[3][3], float b[3][3], float result[3][3]){
       }
     }
 }
+
+void left_mul_M(float L[3][3]){
+  float temp[3][3];
+  mul(L, M, temp);
+  for (int i = 0; i < 3; i++)
+    for (int j = 0; j < 3; j++)
+      M[i][j] = temp[i][j];
+}
+
   void draw(SDL_Surface *s){
   SDL_FillRect(s, NULL, 0);
   const Uint8 *keys = SDL_GetKeyboardState(NULL);
-  if (keys[SDL_SCANCODE_W]) posY = posY - 3;
-  if (keys[SDL_SCANCODE_S]) posY = posY + 3;
-  if (keys[SDL_SCANCODE_A]) posX = posX - 3;
-  if (keys[SDL_SCANCODE_D]) posX = posX + 3;
-  if (keys[SDL_SCANCODE_EQUALS] || keys[SDL_SCANCODE_KP_PLUS]) scale = scale * 1.02;
-  if (keys[SDL_SCANCODE_MINUS] || keys[SDL_SCANCODE_KP_MINUS]) scale = scale / 1.02;
-  if (keys[SDL_SCANCODE_Q]) angle = angle - 0.9;
-  if (keys[SDL_SCANCODE_E]) angle = angle + 0.9;
-    if (keys[SDL_SCANCODE_N] && nWasPressed == false){
-    if (count < 100) count = count + 1;
-    }
-    if (keys[SDL_SCANCODE_M] && mWasPressed == false){
-    if (count > 1) count = count - 1;
-    }
+    if (keys[SDL_SCANCODE_W]) M[1][2] = M[1][2] - 3;
+  if (keys[SDL_SCANCODE_S]) M[1][2] = M[1][2] + 3;
+  if (keys[SDL_SCANCODE_A]) M[0][2] = M[0][2] - 3;
+  if (keys[SDL_SCANCODE_D]) M[0][2] = M[0][2] + 3;
 
-  nWasPressed = keys[SDL_SCANCODE_N];
-  mWasPressed = keys[SDL_SCANCODE_M];
-    if (keys[SDL_SCANCODE_V] && vWasPressed == false) {
-    if (m < 20) m = m + 1;
-    }
-    if (keys[SDL_SCANCODE_C] && cWasPressed == false){
-    if (m > 3) m = m - 1;
-    }
+  float k = 1;
+  if (keys[SDL_SCANCODE_EQUALS] || keys[SDL_SCANCODE_KP_PLUS]) k = 1.02;
+  if (keys[SDL_SCANCODE_MINUS] || keys[SDL_SCANCODE_KP_MINUS]) k = 1 / 1.02;
+  for (int i = 0; i < 2; i++){
+    M[i][0] = M[i][0] * k;
+    M[i][1] = M[i][1] * k;
+  }
 
-  vWasPressed = keys[SDL_SCANCODE_V];
-  cWasPressed = keys[SDL_SCANCODE_C];
-  float c = cos(angle);
-  float sn = sin(angle);
-
-    float T[3][3] = {
-    {1, 0, posX},
-    {0, 1, posY},
-    {0, 0, 1}
+  float da = 0;
+  if (keys[SDL_SCANCODE_Q]) da = -0.02;
+  if (keys[SDL_SCANCODE_E]) da = 0.02;
+  if (da != 0){
+    float c = cos(da);
+    float sn = sin(da);
+    float Rp[3][3] = {
+      {c, -sn, pivotX - c * pivotX + sn * pivotY},
+      {sn, c, pivotY - sn * pivotX - c * pivotY},
+      {0, 0, 1}
     };
+    left_mul_M(Rp);
+  }
 
-    float R[3][3] = {
-    {c, -sn, 0},
-    {sn, c, 0},
-    {0, 0, 1}
-    };
-    float S[3][3] = {
-    {scale, 0, 0},
-    {0, scale, 0},
-    {0, 0, 1}
-    };
-
-  float TR[3][3];
-  float M[3][3];
-
-  mul(T, R, TR);
-  mul(TR, S, M);
+  int mx, my;
+  if (SDL_GetMouseState(&mx, &my) & SDL_BUTTON(SDL_BUTTON_LEFT)){
+    pivotX = mx;
+    pivotY = my;
+  }
   float px[20];
   float py[20];
 
